@@ -322,8 +322,63 @@
       gap: 0.75rem;
       margin-top: 2rem;
     }
-    @media (min-width: 768px) {
-      .btn-row { flex-direction: row; flex-wrap: wrap; }
+
+    .result-share-hint {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.72rem;
+      line-height: 1.4;
+      color: var(--text-mid);
+      margin: 0 0 0.35rem;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-row-share {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    .btn-row-share .btn {
+      flex: 1 1 50%;
+      min-width: 0;
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      padding: 0.55rem 0.4rem;
+      line-height: 1.25;
+      text-align: center;
+      text-decoration: none;
+    }
+    @media (min-width: 480px) {
+      .btn-row-share .btn {
+        font-size: 0.68rem;
+        padding: 0.6rem 0.5rem;
+      }
+    }
+
+    .btn-run-again {
+      width: 100%;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+    }
+
+    a.btn {
+      text-decoration: none;
+      display: inline-block;
+    }
+    a.btn:hover,
+    a.btn:focus-visible {
+      text-decoration: none;
+    }
+
+    .btn-take-quiz {
+      width: 100%;
+      font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+      letter-spacing: 0.12em;
+      padding: 1rem 1.25rem;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      box-sizing: border-box;
     }
 
     .btn {
@@ -1038,9 +1093,22 @@
     return d.innerHTML;
   }
 
+  var LABEL_COPY_LINK = '[ COPY YOUR TRANSMISSION LINK ]';
+  var LABEL_COPIED = '[ COPIED — PASTE TO TRANSMIT ]';
+
   function attachResultButtons(container, worldId, copingId, fromShare) {
     var shareURL =
       window.location.origin + window.location.pathname + '#world=' + worldId + '&coping=' + copingId;
+
+    if (fromShare) {
+      var bTake = document.createElement('a');
+      bTake.className = 'btn btn-primary btn-take-quiz';
+      bTake.href = window.location.pathname || 'index.html';
+      bTake.textContent = '[ TAKE THE QUIZ YOURSELF \u2192 ]';
+      container.appendChild(bTake);
+      return;
+    }
+
     var tw = encodeURIComponent(
       'My dystopia: ' +
         SHARE_LABEL[worldId] +
@@ -1050,12 +1118,21 @@
     );
     var urlEnc = encodeURIComponent(shareURL);
 
+    var hint = document.createElement('p');
+    hint.className = 'result-share-hint';
+    hint.textContent =
+      'Copy your transmission link, then paste it wherever you broadcast the signal.';
+    container.appendChild(hint);
+
+    var rowShare = document.createElement('div');
+    rowShare.className = 'btn-row-share';
+
     var bCopy = document.createElement('button');
     bCopy.type = 'button';
     bCopy.className = 'btn btn-primary';
-    bCopy.textContent = '[ TRANSMIT RESULT ]';
+    bCopy.textContent = LABEL_COPY_LINK;
     bCopy.addEventListener('click', function () {
-      copyToClipboard(shareURL, bCopy);
+      copyToClipboard(shareURL, bCopy, LABEL_COPY_LINK);
     });
 
     var bTweet = document.createElement('a');
@@ -1065,9 +1142,13 @@
     bTweet.rel = 'noopener noreferrer';
     bTweet.textContent = '[ POST TO THE BIRD SITE ]';
 
+    rowShare.appendChild(bCopy);
+    rowShare.appendChild(bTweet);
+    container.appendChild(rowShare);
+
     var bAgain = document.createElement('button');
     bAgain.type = 'button';
-    bAgain.className = 'btn';
+    bAgain.className = 'btn btn-run-again';
     bAgain.textContent = '[ RUN AGAIN ]';
     bAgain.addEventListener('click', function () {
       history.replaceState(null, '', window.location.pathname);
@@ -1077,25 +1158,16 @@
       showScreen('screen-landing');
       runLanding();
     });
-
-    container.appendChild(bCopy);
-    container.appendChild(bTweet);
     container.appendChild(bAgain);
-
-    if (fromShare) {
-      var bTake = document.createElement('a');
-      bTake.className = 'btn';
-      bTake.href = window.location.pathname || 'index.html';
-      bTake.textContent = '[ TAKE THE QUIZ YOURSELF \u2192 ]';
-      container.appendChild(bTake);
-    }
   }
 
-  function copyToClipboard(text, btn) {
+  function copyToClipboard(text, btn, labelRestored) {
+    labelRestored = labelRestored || LABEL_COPY_LINK;
     function done() {
-      var t = btn.textContent;
-      btn.textContent = '[ TRANSMITTED. ]';
-      setTimeout(function () { btn.textContent = t; }, 2000);
+      btn.textContent = LABEL_COPIED;
+      setTimeout(function () {
+        btn.textContent = labelRestored;
+      }, 2200);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done).catch(fallback);
