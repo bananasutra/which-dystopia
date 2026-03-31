@@ -1,25 +1,7 @@
-# CURSOR HANDOFF SPEC
-## "Which Dystopia Are You Living In?" — Interactive Quiz App
-### Version: Aligned with shipped `index.html` (`bananasutra/which-dystopia`) | Author: Bananasutra | Live: [bananasutra.github.io/which-dystopia](https://bananasutra.github.io/which-dystopia/)
+# Which Dystopia Are You Living In?
 
----
-
-## CURSOR OPENING PROMPT
-
-Paste this as your very first Cursor message:
-
-> *"Build a self-contained single HTML file quiz app called 'Which Dystopia Are You Living In?' — full spec attached. Aesthetic: minimal typewriter retro-futuristic. Think classified government terminal — 1984 meets cold war bureaucracy meets literary zine. Special Elite + Courier Prime fonts. Near-black background, off-white typewriter text, CRT scanline overlay. Use character-by-character typewriter *animation* on short lines (landing title, question lines, result headlines); use smooth fade-in on long body copy for a cinematic read. No emoji — typewriters didn't have them. Sharp borders, no rounded corners, no gradients. Everything mechanical and deliberate. Start with the HTML skeleton, CSS variables, and landing screen. We'll build screen by screen."*
-
-**Recommended build order:**
-1. HTML skeleton + CSS variables + fonts
-2. Landing screen
-3. Quiz question component + typewriter reveal
-4. Progress dots
-5. Scoring logic
-6. Result screen (two-stage reveal)
-7. Share mechanic (URL hash + clipboard + tweet)
-8. Bananasutra easter egg
-9. Polish pass (transitions, mobile, texture)
+Literary quiz — reference & specification.  
+Live: [bananasutra.github.io/which-dystopia](https://bananasutra.github.io/which-dystopia/)
 
 ---
 
@@ -39,7 +21,7 @@ A literary personality quiz that assigns users a **dual-archetype result**: the 
 which-dystopia/           ← GitHub repo name
 ├── index.html            ← entire app, fully self-contained
 ├── README.md             ← GitHub Pages deploy instructions
-└── dystopia-quiz-handoff.md   ← this spec (optional in repo)
+└── which-dystopia-spec.md   ← this document
 ```
 
 - **Vanilla JS only** — no frameworks, no build step, no npm
@@ -1036,5 +1018,4 @@ Banana interstitial:  [ ARCHETYPE NOT FOUND ] → [ CLASSIFICATION ERROR ] → B
 
 ---
 
-*Spec aligned with shipped `index.html` in `bananasutra/which-dystopia` (share UI, URLs, tweet copy, `SHARE_LABEL`).*
-*Build with Cursor. Deploy to GitHub Pages. Terrify the paper-pushers.*
+*Content tracks the shipped app in `bananasutra/which-dystopia`.*
