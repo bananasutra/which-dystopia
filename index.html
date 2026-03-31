@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Which Dystopia Are You Living In?</title>
+  <meta name="description" content="10 questions. 5 literary nightmares. One uncomfortable mirror.">
+  <meta property="og:title" content="Which Dystopia Are You Living In?">
+  <meta property="og:description" content="10 questions. 5 literary nightmares. One uncomfortable mirror.">
+  <meta property="og:url" content="https://bananasutra.github.io/which-dystopia/">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0A08;
+      --text: #E8E4D9;
+      /* Eyebrows / metadata: readable on black (~4.5:1+ vs background) */
+      --text-eyebrow: rgba(232, 228, 217, 0.78);
+      --text-dim: rgba(232, 228, 217, 0.45);
+      --text-mid: rgba(232, 228, 217, 0.72);
+      --border: rgba(232, 228, 217, 0.15);
+      --border-hover: rgba(232, 228, 217, 0.5);
+      --orwell: #5A7A99;
+      --huxley: #B08830;
+      --bradbury: #B85522;
+      --kafka: #6B6545;
+      --atwood: #7A3348;
+      --banana: #FFE600;
+      --active: var(--orwell);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; }
+    @media (min-width: 768px) { html { font-size: 18px; } }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      line-height: 1.55;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      padding: 2rem 1.25rem 5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .screen.active { display: block; }
+
+    #screen-quiz.active { padding: 1.25rem 1rem 5.5rem; }
+    @media (min-width: 768px) {
+      #screen-quiz.active { padding: 2rem 1.25rem 6rem; }
+    }
+
+    .label {
+      font-family: 'Courier Prime', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.72rem;
+      color: var(--text-eyebrow);
+      margin-bottom: 1.5rem;
+    }
+
+    .landing-title {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.75rem, 6vw, 2.75rem);
+      line-height: 1.15;
+      margin: 0 0 1.25rem;
+    }
+
+    .landing-sub {
+      color: var(--text-mid);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .landing-sub.visible { opacity: 1; }
+
+    .landing-inner {
+      min-height: calc(100dvh - 4rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .question-num {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-eyebrow);
+      margin-bottom: 0.65rem;
+    }
+
+    .question-text {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.05rem, 3.8vw, 1.6rem);
+      margin: 0 0 1rem;
+      line-height: 1.35;
+      min-height: 0;
+    }
+    @media (min-width: 768px) {
+      .question-text { font-size: 1.5rem; margin-bottom: 1.5rem; }
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+    }
+    /* Single column everywhere: five equal full-width options (no positional skew) */
+    .answer-card {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background-color 0.15s, opacity 0.2s, transform 0.2s;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.92rem;
+      line-height: 1.35;
+      border-radius: 0;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    .answer-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .answer-card[data-archetype="orwell"] { --accent: var(--orwell); }
+    .answer-card[data-archetype="huxley"] { --accent: var(--huxley); }
+    .answer-card[data-archetype="bradbury"] { --accent: var(--bradbury); }
+    .answer-card[data-archetype="kafka"] { --accent: var(--kafka); }
+    .answer-card[data-archetype="atwood"] { --accent: var(--atwood); }
+
+    .answer-card:hover:not(:disabled) {
+      border-color: var(--accent, var(--border-hover));
+      color: var(--accent, var(--text));
+    }
+    .answer-card:focus-visible {
+      outline: 1px solid var(--text-mid);
+      outline-offset: 2px;
+    }
+    .answer-card.selected {
+      border-color: var(--accent, var(--border-hover));
+      background-color: color-mix(in srgb, var(--accent, var(--text)) 15%, transparent 85%);
+      color: var(--accent, var(--text));
+    }
+    .answer-card:disabled { cursor: default; }
+    @media (min-width: 768px) {
+      .answer-card { padding: 1rem 1.25rem; font-size: 1rem; }
+    }
+
+    #progress-dots {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding-bottom: 2rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.4em;
+      z-index: 100;
+      color: var(--text-mid);
+      pointer-events: none;
+    }
+    #progress-dots.hidden { display: none; }
+
+    .result-screen {
+      background-color: color-mix(in srgb, var(--active) 10%, var(--bg) 90%);
+      transition: background-color 0.8s ease;
+      min-height: 100dvh;
+    }
+    @supports not (background: color-mix(in srgb, red 10%, blue 90%)) {
+      .result-screen { background-color: var(--bg); }
+    }
+
+    .result-headline {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      margin: 0 0 0.5rem;
+      line-height: 1.2;
+    }
+    @media (min-width: 768px) {
+      .result-headline { font-size: 2.2rem; }
+    }
+
+    .result-subtitle {
+      font-style: italic;
+      color: var(--text-mid);
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+    }
+
+    .result-body {
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.25rem;
+    }
+
+    .result-body.fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .cta-line { margin: 1rem 0 0.5rem; font-weight: 700; }
+    .book-line { margin-top: 0.5rem; }
+    .book-readnext-block {
+      margin-top: 0.75rem;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+    .book-readnext-block .read-next-list {
+      margin: 0.5rem 0 0;
+      padding-left: 1.25rem;
+      list-style: square;
+    }
+    .book-readnext-block .read-next-list li {
+      margin-bottom: 0.35rem;
+    }
+    .book-readnext-block .read-next-note {
+      margin-top: 0.65rem;
+      color: var(--text-mid);
+      font-style: italic;
+    }
+
+    .result-coping-name {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.15rem, 3.5vw, 1.5rem);
+      margin: 0.35rem 0 0.75rem;
+      line-height: 1.25;
+    }
+
+    .resistance-label {
+      font-family: 'Courier Prime', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.72rem;
+      color: var(--text-eyebrow);
+      margin: 0 0 0.25rem;
+    }
+
+    details.dystopia-details {
+      border: 1px solid var(--border);
+      margin: 1.5rem 0 0;
+      padding: 0;
+    }
+    details.dystopia-details summary {
+      cursor: pointer;
+      padding: 0.65rem 0.85rem;
+      font-family: 'Courier Prime', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      list-style: none;
+    }
+    details.dystopia-details summary::-webkit-details-marker { display: none; }
+    details.dystopia-details[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+    .dystopia-table-wrap {
+      padding: 0.65rem 0.85rem 0.85rem;
+      overflow-x: auto;
+    }
+    table.dystopia-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+    table.dystopia-table th,
+    table.dystopia-table td {
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.5rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.dystopia-table th {
+      color: var(--text-eyebrow);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.65rem;
+    }
+    table.dystopia-table td.dystopia-name-banana {
+      color: var(--banana);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 768px) {
+      .btn-row { flex-direction: row; flex-wrap: wrap; }
+    }
+
+    .btn {
+      font-family: 'Courier Prime', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-radius: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn:hover {
+      border-color: var(--text-mid);
+      color: var(--text);
+    }
+    .btn:focus-visible {
+      outline: 1px solid var(--text-mid);
+      outline-offset: 2px;
+    }
+    .btn-primary { border-color: var(--text-mid); }
+
+    .cursor {
+      animation: blink 0.8s step-end infinite;
+      color: var(--text-mid);
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      pointer-events: none;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.08s ease;
+    }
+    .flash-overlay.on { opacity: 1; }
+
+    .banana-static {
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      pointer-events: none;
+      opacity: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.03),
+        rgba(0,0,0,0.1) 1px,
+        transparent 2px
+      );
+      animation: staticFlash 0.15s ease forwards;
+    }
+    @keyframes staticFlash {
+      0% { opacity: 0; }
+      40% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+
+    .banana-wash {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      pointer-events: none;
+      background: rgba(255, 230, 0, 0.25);
+      opacity: 0;
+      animation: washFlash 0.35s ease forwards;
+    }
+    @keyframes washFlash {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .glitch-text {
+      animation: glitch 0.7s ease forwards;
+    }
+    @keyframes glitch {
+      0%   { opacity: 1;   transform: skewX(0deg);   letter-spacing: normal; }
+      15%  { opacity: 0.7; transform: skewX(-4deg);  letter-spacing: 0.15em; }
+      30%  { opacity: 1;   transform: skewX(3deg);   letter-spacing: -0.05em; }
+      50%  { opacity: 0.8; transform: skewX(-2deg);  letter-spacing: 0.08em; }
+      70%  { opacity: 1;   transform: skewX(1deg);   letter-spacing: normal; }
+      100% { opacity: 1;   transform: skewX(0deg);   letter-spacing: normal; }
+    }
+
+    .blink-once {
+      animation: blinkOnce 0.4s ease;
+    }
+    @keyframes blinkOnce {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    #screen-result[aria-busy="true"] { pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; opacity: 1; }
+      .answer-card { opacity: 1; transform: none; }
+      .result-body.fade-in { animation: none; opacity: 1; }
+      .glitch-text { animation: none; }
+      .banana-static, .banana-wash { animation: none; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="flash-overlay" class="flash-overlay" aria-hidden="true"></div>
+
+  <div id="screen-landing" class="screen active">
+    <div class="landing-inner">
+      <p class="label">CLASSIFIED</p>
+      <h1 class="landing-title" id="landing-title"></h1>
+      <p class="landing-sub" id="landing-sub">10 questions. 5 literary nightmares.<br>One uncomfortable mirror.</p>
+      <button type="button" class="btn btn-primary" id="btn-begin" hidden>[ BEGIN TRANSMISSION ]</button>
+    </div>
+  </div>
+
+  <div id="screen-quiz" class="screen" role="region" aria-live="polite" aria-label="Quiz">
+    <p class="question-num" id="question-label"></p>
+    <p class="question-text" id="question-text"></p>
+    <div class="answers-grid" id="answers-grid"></div>
+  </div>
+
+  <div id="screen-result" class="screen result-screen" role="region" aria-label="Result">
+    <p class="label">[ CLASSIFICATION REPORT ]</p>
+    <div id="result-content"></div>
+    <div class="btn-row" id="result-actions"></div>
+  </div>
+
+  <div id="progress-dots" class="hidden" aria-hidden="true"></div>
+
+  <script>
+(function () {
+  'use strict';
+
+  const VALID_ARCHETYPES = ['orwell', 'huxley', 'bradbury', 'kafka', 'atwood', 'banana'];
+  const WORLD_QS = [1, 3, 6, 7, 8, 9];
+  const COPING_QS = [2, 4, 5, 10];
+
+  /** One adjective per archetype for share text */
+  const SHARE_LABEL = {
+    orwell: 'Orwellian',
+    huxley: 'Huxleyan',
+    bradbury: 'Bradburian',
+    kafka: 'Kafkaesque',
+    atwood: 'Atwoodian',
+    banana: 'Bananasutra'
+  };
+
+  const ARC_COLORS = {
+    orwell: '#5A7A99', huxley: '#B08830', bradbury: '#B85522',
+    kafka: '#6B6545', atwood: '#7A3348', banana: '#FFE600'
+  };
+
+  const WORLD = {
+    orwell: {
+      title: 'ORWELLIAN REALITY',
+      subtitle: 'Big Brother saw you hesitate before answering.',
+      bodyShort: 'You live in a world where truth is the first casualty — then language, then memory. Power doesn\'t just lie; it makes you doubt your own version of events. Your superpower is refusing to call obvious lies "complicated." — keep questioning; reality depends on rebels like you.',
+      bodyUnified: 'You live in a world where truth is the first casualty — then language, then memory. Power doesn\'t just lie; it makes you doubt your own version of events. Your superpower is refusing to call obvious lies "complicated." You resist by naming things accurately — when language gets slippery, precision is your weapon against euphemism. Keep questioning. Reality depends on rebels like you.',
+      book: 'Nineteen Eighty-Four — George Orwell'
+    },
+    huxley: {
+      title: 'HUXLEYAN REALITY',
+      subtitle: 'Have you tried the new limited-edition dopamine drop?',
+      bodyShort: 'You live in a sweetened trap with excellent UX. Nobody burned your books — they just gave you infinite content until reading felt exhausting. You sense something missing, but the notification arrives right on time.',
+      bodyUnified: 'You live in a sweetened trap with excellent UX. Nobody burned your books — they just gave you infinite content until reading felt exhausting. You sense something missing, but the notification arrives right on time. You resist by choosing what you consume — noticing where your attention goes is the radical act. Boredom is not the enemy. Boredom is the door.',
+      book: 'Brave New World — Aldous Huxley'
+    },
+    bradbury: {
+      title: 'BRADBURIAN REALITY',
+      subtitle: 'The fire is inside you. Guard it.',
+      bodyShort: 'You live in a world where forgetting is the real crime — and nobody\'s forcing it. Apathy does the burning now, one distracted scroll at a time. You still carry a flame: imagination, rarer and more dangerous than any banned book.',
+      bodyUnified: 'You live in a world where forgetting is the real crime — and nobody\'s forcing it. Apathy does the burning now, one distracted scroll at a time. You still carry a flame: imagination, rarer and more dangerous than any banned book. You resist by remembering on everyone\'s behalf — stories the algorithm never indexed. You are the long game.',
+      book: 'Fahrenheit 451 — Ray Bradbury'
+    },
+    kafka: {
+      title: 'KAFKAESQUE REALITY',
+      subtitle: 'Your appeal form was lost. Please resubmit in triplicate.',
+      bodyShort: 'The system isn\'t cruel exactly — it\'s indifferent in ways that feel personal. Rules contradict rules. Doors open onto hallways. Guilt arrives before the accusation.',
+      bodyUnified: 'The system isn\'t cruel exactly — it\'s indifferent in ways that feel personal. Rules contradict rules. Doors open onto hallways. Guilt arrives before the accusation. You refuse to take the chaos personally — you find the dark joke in the impossible form. That isn\'t avoidance; it\'s philosophical judo. Your appeal form was lost. Please resubmit in triplicate.',
+      book: 'The Trial — Franz Kafka'
+    },
+    atwood: {
+      title: 'ATWOODIAN REALITY',
+      subtitle: 'They didn\'t take your voice. They taught you to silence it yourself.',
+      bodyShort: 'You live in a world where control arrives wrapped in concern — for your safety, your health, your own good. Language is tender and totalitarian at once. Your body is a policy, your compliance expected with a smile.',
+      bodyUnified: 'You live in a world where control arrives wrapped in concern — for your safety, your health, your own good. Language is tender and totalitarian at once. Your body is a policy, your compliance expected with a smile. You resist by carrying the record — in fragments, in whispers, in margins. Memory is political; testimony is survival. You remember what words meant before they were repurposed.',
+      book: 'The Handmaid\'s Tale — Margaret Atwood'
+    },
+    banana: {
+      title: 'BANANASUTRA REALITY',
+      subtitle: 'You refused to be sorted. Suspicious. Impressive. Very on-brand.',
+      bodyShort: 'You don\'t fit neatly inside any single nightmare — which means you\'ve been paying attention to all of them simultaneously. You are fluent in multiple dystopias, which is either a superpower or a therapy bill. Probably both.',
+      bodyUnified: 'You don\'t fit neatly inside any single nightmare — which means you\'ve been paying attention to all of them simultaneously. You are fluent in multiple dystopias, which is either a superpower or a therapy bill. Probably both. The system cannot classify you — and that is the most subversive thing you could possibly be. You resist by refusing the frame entirely; absurdist joy deployed with surgical precision.',
+      book: null
+    }
+  };
+
+  const UNIFIED_HEADLINE_END = {
+    orwell: 'ORWELLIAN.',
+    huxley: 'HUXLEYAN.',
+    bradbury: 'BRADBURIAN.',
+    kafka: 'KAFKAESQUE.',
+    atwood: 'ATWOODIAN.',
+    banana: 'BANANASUTRA.'
+  };
+
+  /** Full reading map for Bananasutra result (all five literary archetypes). */
+  const READ_NEXT_ALL = [
+    { tag: 'Orwellian', gist: 'truth, surveillance, language', book: 'Nineteen Eighty-Four', author: 'George Orwell' },
+    { tag: 'Huxleyan', gist: 'pleasure, sedation, comfort', book: 'Brave New World', author: 'Aldous Huxley' },
+    { tag: 'Bradburian', gist: 'apathy, memory, fire', book: 'Fahrenheit 451', author: 'Ray Bradbury' },
+    { tag: 'Kafkaesque', gist: 'bureaucracy, absurdity', book: 'The Trial', author: 'Franz Kafka' },
+    { tag: 'Atwoodian', gist: 'bodily control, compliance', book: 'The Handmaid\'s Tale', author: 'Margaret Atwood' }
+  ];
+
+  const COPING = {
+    orwell: {
+      name: 'THE TRUTH-TELLER',
+      bodyShort: 'You resist by naming things accurately; when language gets slippery, you reach for precision like a weapon. You document, you challenge, you refuse euphemism — not to be difficult, but because reality depends on someone saying the true word.',
+      move: 'Say the true word out loud, in public, without softening it.'
+    },
+    huxley: {
+      name: 'THE PLEASURE REFUSER',
+      bodyShort: 'You resist by choosing what you consume. You know the trap is sweet — and sometimes you eat the cookie anyway — but you notice; choosing where your attention goes is the radical act.',
+      move: 'Put the phone down for one hour and sit with what surfaces.'
+    },
+    bradbury: {
+      name: 'THE MEMORY KEEPER',
+      bodyShort: 'You resist by remembering on everyone\'s behalf — stories, names, and context the algorithm never indexed. You are the long game.',
+      move: 'Tell someone a story they\'ve never heard. Slowly. Without a point.'
+    },
+    kafka: {
+      name: 'THE ABSURDIST',
+      bodyShort: 'You resist by refusing to take the chaos personally. You find the dark joke in the impossible form — that\'s philosophical judo, and it is rarer than it looks.',
+      move: 'Write the absurdity down. Make it funny. Send it to one person.'
+    },
+    atwood: {
+      name: 'THE WITNESS',
+      bodyShort: 'You resist by carrying the record. You pass the truth on in fragments, in whispers, in margins — memory is political, and the archive doesn\'t maintain itself.',
+      move: 'Write something true that you\'ve been keeping quiet. Even if only for yourself.'
+    },
+    banana: {
+      name: 'THE TRICKSTER',
+      bodyShort: 'You resist by refusing the frame entirely. You are a category-buster; your tool is absurdist joy deployed with surgical precision when the system least expects it.',
+      move: 'Do the unexpected, generous, ridiculous thing. Today.'
+    }
+  };
+
+  const DYSTOPIA_TABLE_ROWS = [
+    { id: 'orwell', name: 'Orwellian', theme: 'Weaponized truth, surveillance', book: 'Nineteen Eighty-Four — George Orwell' },
+    { id: 'huxley', name: 'Huxleyan', theme: 'Pleasure, sedation, comfort', book: 'Brave New World — Aldous Huxley' },
+    { id: 'bradbury', name: 'Bradburian', theme: 'Apathy, memory, fire', book: 'Fahrenheit 451 — Ray Bradbury' },
+    { id: 'kafka', name: 'Kafkaesque', theme: 'Bureaucracy, absurdity', book: 'The Trial — Franz Kafka' },
+    { id: 'atwood', name: 'Atwoodian', theme: 'Bodily control, compliance', book: 'The Handmaid\'s Tale — Margaret Atwood' },
+    {
+      id: 'banana',
+      name: 'Bananasutra',
+      theme: 'Refusing the frame entirely',
+      book: 'All of the above — start anywhere'
+    }
+  ];
+
+  const QUESTIONS = [
+    { index: 1, dimension: 'world', text: 'What worries you most today?', answers: [
+      { text: 'Lies disguised as truth', archetype: 'orwell' },
+      { text: 'Endless distraction', archetype: 'huxley' },
+      { text: 'Growing apathy', archetype: 'bradbury' },
+      { text: 'Absurd, senseless bureaucracy', archetype: 'kafka' },
+      { text: 'Bodies controlled by doctrine', archetype: 'atwood' }
+    ]},
+    { index: 2, dimension: 'coping', text: 'You realize you made a mistake at work. What\'s your first reaction?', answers: [
+      { text: 'Fear of punishment', archetype: 'orwell' },
+      { text: 'Open another tab. There\'s always another tab.', archetype: 'huxley' },
+      { text: 'Feel it quietly, then forget what I was worried about', archetype: 'bradbury' },
+      { text: 'Dread the paperwork', archetype: 'kafka' },
+      { text: 'Smile and pretend it never happened', archetype: 'atwood' }
+    ]},
+    { index: 3, dimension: 'world', text: 'What\'s more dangerous?', answers: [
+      { text: 'Mass surveillance', archetype: 'orwell' },
+      { text: 'Mass sedation', archetype: 'huxley' },
+      { text: 'Mass ignorance', archetype: 'bradbury' },
+      { text: 'Mass absurdity', archetype: 'kafka' },
+      { text: 'Mass compliance dressed as morality', archetype: 'atwood' }
+    ]},
+    { index: 4, dimension: 'coping', text: 'Your coping strategy?', answers: [
+      { text: 'Resist and question everything', archetype: 'orwell' },
+      { text: 'Escape into fun, friends, treats', archetype: 'huxley' },
+      { text: 'Read secret books and daydream', archetype: 'bradbury' },
+      { text: 'Write weird poetry nobody reads', archetype: 'kafka' },
+      { text: 'Tell your story in secret, in fragments', archetype: 'atwood' }
+    ]},
+    { index: 5, dimension: 'coping', text: 'You find a forbidden book. What do you do?', answers: [
+      { text: 'Memorize it before they erase it', archetype: 'orwell' },
+      { text: 'Forget it, there\'s a new Netflix drop', archetype: 'huxley' },
+      { text: 'Hide it but forget where you put it', archetype: 'bradbury' },
+      { text: 'Assume it\'s a bureaucratic trap', archetype: 'kafka' },
+      { text: 'Read it in the dark, then pass it on', archetype: 'atwood' }
+    ]},
+    { index: 6, dimension: 'world', text: 'What is truth?', answers: [
+      { text: 'Constantly under attack', archetype: 'orwell' },
+      { text: 'Whatever feels good now', archetype: 'huxley' },
+      { text: 'An endangered species', archetype: 'bradbury' },
+      { text: 'A running joke', archetype: 'kafka' },
+      { text: 'Whatever they need it to be today', archetype: 'atwood' }
+    ]},
+    { index: 7, dimension: 'world', text: 'What\'s your biggest enemy?', answers: [
+      { text: 'Authoritarian rulers', archetype: 'orwell' },
+      { text: 'Boredom and sedation', archetype: 'huxley' },
+      { text: 'Forgetfulness and apathy', archetype: 'bradbury' },
+      { text: 'Paperwork from hell', archetype: 'kafka' },
+      { text: 'Enforced silence and performed smiles', archetype: 'atwood' }
+    ]},
+    { index: 8, dimension: 'world', text: 'When you hear "freedom," you think:', answers: [
+      { text: 'A risk worth dying for', archetype: 'orwell' },
+      { text: 'A comfy beach chair', archetype: 'huxley' },
+      { text: 'A banned book in a fire', archetype: 'bradbury' },
+      { text: 'A permit I\'ll never finish applying for', archetype: 'kafka' },
+      { text: 'A word they redefined when I wasn\'t looking', archetype: 'atwood' }
+    ]},
+    { index: 9, dimension: 'world', text: 'You wake up tomorrow and reality feels different. What\'s happening?', answers: [
+      { text: 'The news no longer sounds like news', archetype: 'orwell' },
+      { text: 'There\'s a great new thing everyone\'s excited about', archetype: 'huxley' },
+      { text: 'Something important ended and no one noticed', archetype: 'bradbury' },
+      { text: 'I violated a rule I didn\'t know existed', archetype: 'kafka' },
+      { text: 'Someone made a decision about me while I slept', archetype: 'atwood' }
+    ]},
+    { index: 10, dimension: 'coping', text: 'Deep down, what gives you hope?', answers: [
+      { text: 'Truth and courage', archetype: 'orwell' },
+      { text: 'Beauty and love', archetype: 'huxley' },
+      { text: 'Imagination and memory', archetype: 'bradbury' },
+      { text: 'Humor, dreams, and tiny rebellions', archetype: 'kafka' },
+      { text: 'The ones who kept the record when keeping it was forbidden', archetype: 'atwood' }
+    ]}
+  ];
+
+  let worldScores = emptyScores();
+  let copingScores = emptyScores();
+  let currentQ = 0;
+  let reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function emptyScores() {
+    return { orwell: 0, huxley: 0, bradbury: 0, kafka: 0, atwood: 0 };
+  }
+
+  function recordAnswer(questionIndex, archetype) {
+    if (WORLD_QS.indexOf(questionIndex) >= 0) worldScores[archetype]++;
+    else if (COPING_QS.indexOf(questionIndex) >= 0) copingScores[archetype]++;
+    updateProgressDots();
+  }
+
+  /** Tie for first place on a dimension → banana for that dimension. */
+  function resolveDimension(scores) {
+    var max = Math.max.apply(null, Object.values(scores));
+    var winners = Object.keys(scores).filter(function (k) { return scores[k] === max; });
+    if (winners.length > 1) return 'banana';
+    return winners[0];
+  }
+
+  function getResults() {
+    return {
+      world: resolveDimension(worldScores),
+      coping: resolveDimension(copingScores)
+    };
+  }
+
+  function setActiveFromWorld(id) {
+    var c = ARC_COLORS[id] || ARC_COLORS.orwell;
+    document.documentElement.style.setProperty('--active', c);
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function (el) {
+      el.classList.remove('active');
+    });
+    var s = document.getElementById(id);
+    if (s) s.classList.add('active');
+  }
+
+  function updateProgressDots() {
+    var el = document.getElementById('progress-dots');
+    if (!el.classList.contains('hidden')) {
+      el.textContent = buildDotsString(currentQ);
+    }
+  }
+
+  function buildDotsString(activeIndex) {
+    var s = '';
+    for (var i = 0; i < 10; i++) {
+      if (i < activeIndex) s += '\u25AA ';
+      else if (i === activeIndex) s += '\u25A1 ';
+      else s += '\u00B7 ';
+    }
+    return s.trim();
+  }
+
+  function typewriter(el, text, speed, callback) {
+    el.textContent = '';
+    if (reducedMotion) {
+      el.textContent = text;
+      if (callback) callback();
+      return;
+    }
+    var i = 0;
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.textContent = '|';
+    el.appendChild(cursor);
+    var interval = setInterval(function () {
+      if (i < text.length) {
+        el.insertBefore(document.createTextNode(text[i]), cursor);
+        i++;
+      } else {
+        clearInterval(interval);
+        cursor.remove();
+        if (callback) callback();
+      }
+    }, speed);
+  }
+
+  function runLanding() {
+    var titleEl = document.getElementById('landing-title');
+    var sub = document.getElementById('landing-sub');
+    var btn = document.getElementById('btn-begin');
+    btn.hidden = true;
+    sub.classList.remove('visible');
+    typewriter(titleEl, 'WHICH DYSTOPIA\nARE YOU LIVING IN?', 40, function () {
+      sub.classList.add('visible');
+      btn.hidden = false;
+      btn.classList.add('blink-once');
+    });
+  }
+
+  function beginQuiz() {
+    history.replaceState(null, '', window.location.pathname);
+    worldScores = emptyScores();
+    copingScores = emptyScores();
+    currentQ = 0;
+    document.getElementById('progress-dots').classList.remove('hidden');
+    showScreen('screen-quiz');
+    renderQuestion(0);
+  }
+
+  function renderQuestion(idx) {
+    currentQ = idx;
+    updateProgressDots();
+    var q = QUESTIONS[idx];
+    document.getElementById('question-label').textContent = 'QUESTION ' + q.index + ' OF 10';
+    var qt = document.getElementById('question-text');
+    var grid = document.getElementById('answers-grid');
+    grid.innerHTML = '';
+    typewriter(qt, q.text, 28, function () {
+      q.answers.forEach(function (a, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'answer-card';
+        b.setAttribute('data-archetype', a.archetype);
+        b.textContent = a.text;
+        b.addEventListener('click', function () { onAnswer(b, a.archetype); });
+        grid.appendChild(b);
+        setTimeout(function () {
+          b.classList.add('visible');
+        }, reducedMotion ? 0 : 50 * i);
+      });
+    });
+  }
+
+  function onAnswer(btn, archetype) {
+    var q = QUESTIONS[currentQ];
+    var cards = document.querySelectorAll('#answers-grid .answer-card');
+    cards.forEach(function (c) { c.disabled = true; });
+    btn.classList.add('selected');
+    recordAnswer(q.index, archetype);
+    setTimeout(function () {
+      document.getElementById('flash-overlay').classList.add('on');
+      setTimeout(function () {
+        document.getElementById('flash-overlay').classList.remove('on');
+        if (currentQ < 9) {
+          renderQuestion(currentQ + 1);
+        } else {
+          document.getElementById('progress-dots').classList.add('hidden');
+          var r = getResults();
+          showResult(r.world, r.coping, { fromShare: false });
+        }
+      }, 80);
+    }, 400);
+  }
+
+  function appendBananaReadNextBlock(wrap) {
+    var bookBlock = document.createElement('div');
+    bookBlock.className = 'book-line book-readnext-block';
+    var readNextIntro = document.createElement('p');
+    readNextIntro.style.margin = '0 0 0.35rem';
+    readNextIntro.innerHTML =
+      '<strong>READ THIS NEXT:</strong> The quiz maps to five literary dystopias — pick one thread or read the set:';
+    bookBlock.appendChild(readNextIntro);
+    var ul = document.createElement('ul');
+    ul.className = 'read-next-list';
+    READ_NEXT_ALL.forEach(function (row) {
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<strong>' + escapeHtml(row.tag) + '</strong> — <em>' + escapeHtml(row.book) + '</em> (' +
+        escapeHtml(row.author) + '). ' + escapeHtml(row.gist) + '.';
+      ul.appendChild(li);
+    });
+    bookBlock.appendChild(ul);
+    var note = document.createElement('p');
+    note.className = 'read-next-note';
+    note.textContent = 'Start anywhere. Keep going.';
+    bookBlock.appendChild(note);
+    wrap.appendChild(bookBlock);
+  }
+
+  function appendDystopiaDetails(wrap) {
+    var det = document.createElement('details');
+    det.className = 'dystopia-details';
+    var sum = document.createElement('summary');
+    sum.textContent = '[ + SEE THE FOOL DYSTOPIAN SYSTEM ]';
+    det.appendChild(sum);
+    var tw = document.createElement('div');
+    tw.className = 'dystopia-table-wrap';
+    var table = document.createElement('table');
+    table.className = 'dystopia-table';
+    var thead = document.createElement('thead');
+    thead.innerHTML =
+      '<tr><th>Name</th><th>Core theme</th><th>Book</th><th>YOUR MOVE</th></tr>';
+    table.appendChild(thead);
+    var tb = document.createElement('tbody');
+    DYSTOPIA_TABLE_ROWS.forEach(function (row) {
+      var co = COPING[row.id];
+      var tr = document.createElement('tr');
+      var tdName = document.createElement('td');
+      tdName.textContent = row.name;
+      if (row.id === 'banana') tdName.className = 'dystopia-name-banana';
+      var tdTheme = document.createElement('td');
+      tdTheme.textContent = row.theme;
+      var tdBook = document.createElement('td');
+      var em = document.createElement('em');
+      em.textContent = row.book;
+      tdBook.appendChild(em);
+      var tdMove = document.createElement('td');
+      tdMove.textContent = co.move;
+      tr.appendChild(tdName);
+      tr.appendChild(tdTheme);
+      tr.appendChild(tdBook);
+      tr.appendChild(tdMove);
+      tb.appendChild(tr);
+    });
+    table.appendChild(tb);
+    tw.appendChild(table);
+    det.appendChild(tw);
+    det.addEventListener('toggle', function () {
+      sum.textContent = det.open ? '[ − HIDE ]' : '[ + SEE THE FOOL DYSTOPIAN SYSTEM ]';
+    });
+    wrap.appendChild(det);
+  }
+
+  function renderUnifiedResult(wrap, id, bananaFX, fromShare, actions) {
+    var w = WORLD[id];
+    var c = COPING[id];
+    var head = document.createElement('h2');
+    head.className = 'result-headline';
+    if (bananaFX) head.classList.add('glitch-text');
+    var sub = document.createElement('p');
+    sub.className = 'result-subtitle';
+    sub.textContent = w.subtitle;
+    var unifiedHead = 'YOU ARE FULLY, COMPLETELY,\nUNAPOLOGETICALLY ' + UNIFIED_HEADLINE_END[id];
+
+    function afterHead() {
+      var body = document.createElement('div');
+      body.className = 'result-body fade-in';
+      body.textContent = w.bodyUnified;
+      wrap.appendChild(body);
+      var move = document.createElement('p');
+      move.className = 'cta-line';
+      move.innerHTML = '<strong>YOUR MOVE:</strong> ' + escapeHtml(c.move);
+      wrap.appendChild(move);
+      if (id === 'banana') {
+        appendBananaReadNextBlock(wrap);
+      } else {
+        var book = document.createElement('p');
+        book.className = 'book-line';
+        book.innerHTML = '<strong>READ THIS NEXT:</strong> <em>' + escapeHtml(w.book) + '</em>';
+        wrap.appendChild(book);
+      }
+      var rule = document.createElement('hr');
+      rule.className = 'rule';
+      wrap.appendChild(rule);
+      appendDystopiaDetails(wrap);
+      document.getElementById('screen-result').setAttribute('aria-busy', 'false');
+      attachResultButtons(actions, id, id, fromShare);
+    }
+
+    wrap.appendChild(head);
+    wrap.appendChild(sub);
+    if (fromShare) {
+      head.textContent = unifiedHead;
+      afterHead();
+    } else {
+      typewriter(head, unifiedHead, 20, afterHead);
+    }
+  }
+
+  function renderSplitResult(wrap, worldId, copingId, bananaFX, fromShare, actions) {
+    var w = WORLD[worldId];
+    var c = COPING[copingId];
+    var worldHead = document.createElement('h2');
+    worldHead.className = 'result-headline';
+    if (bananaFX) worldHead.classList.add('glitch-text');
+    var sub = document.createElement('p');
+    sub.className = 'result-subtitle';
+    sub.textContent = w.subtitle;
+
+    function afterWorldHead() {
+      var wb = document.createElement('div');
+      wb.className = 'result-body fade-in';
+      wb.textContent = w.bodyShort;
+      wrap.appendChild(wb);
+      if (worldId === 'banana') {
+        appendBananaReadNextBlock(wrap);
+      } else {
+        var book = document.createElement('p');
+        book.className = 'book-line';
+        book.innerHTML = '<strong>READ THIS NEXT:</strong> <em>' + escapeHtml(w.book) + '</em>';
+        wrap.appendChild(book);
+      }
+      var rule = document.createElement('hr');
+      rule.className = 'rule';
+      wrap.appendChild(rule);
+
+      var pLabel = document.createElement('p');
+      pLabel.className = 'resistance-label';
+      pLabel.textContent = 'YOUR RESISTANCE PROFILE:';
+      wrap.appendChild(pLabel);
+      var nameEl = document.createElement('h3');
+      nameEl.className = 'result-coping-name';
+      nameEl.textContent = c.name;
+      wrap.appendChild(nameEl);
+      var cb = document.createElement('div');
+      cb.className = 'result-body fade-in';
+      cb.textContent = c.bodyShort;
+      wrap.appendChild(cb);
+      var move = document.createElement('p');
+      move.className = 'cta-line';
+      move.innerHTML = '<strong>YOUR MOVE:</strong> ' + escapeHtml(c.move);
+      wrap.appendChild(move);
+      var rule2 = document.createElement('hr');
+      rule2.className = 'rule';
+      wrap.appendChild(rule2);
+      appendDystopiaDetails(wrap);
+      document.getElementById('screen-result').setAttribute('aria-busy', 'false');
+      attachResultButtons(actions, worldId, copingId, fromShare);
+    }
+
+    wrap.appendChild(worldHead);
+    wrap.appendChild(sub);
+    var livingPrefix = youAreLivingInPrefix(w.title);
+    if (fromShare) {
+      worldHead.textContent = livingPrefix + w.title;
+      afterWorldHead();
+    } else {
+      typewriter(worldHead, livingPrefix + w.title, 20, afterWorldHead);
+    }
+  }
+
+  function showResult(worldId, copingId, opts) {
+    opts = opts || {};
+    var fromShare = opts.fromShare;
+    showScreen('screen-result');
+    setActiveFromWorld(worldId);
+    var wrap = document.getElementById('result-content');
+    var actions = document.getElementById('result-actions');
+    wrap.innerHTML = '';
+    actions.innerHTML = '';
+    document.getElementById('screen-result').setAttribute('aria-busy', 'true');
+
+    var bananaFX = (worldId === 'banana' || copingId === 'banana') && !reducedMotion;
+    if (bananaFX) {
+      var st = document.createElement('div');
+      st.className = 'banana-static';
+      document.body.appendChild(st);
+      setTimeout(function () { st.remove(); }, 200);
+      var wash = document.createElement('div');
+      wash.className = 'banana-wash';
+      document.body.appendChild(wash);
+      setTimeout(function () { wash.remove(); }, 400);
+    }
+
+    if (worldId === copingId) {
+      renderUnifiedResult(wrap, worldId, bananaFX, fromShare, actions);
+    } else {
+      renderSplitResult(wrap, worldId, copingId, bananaFX, fromShare, actions);
+    }
+  }
+
+  /** "A" vs "AN" before the all-caps REALITY title (first letter of title word). */
+  function youAreLivingInPrefix(title) {
+    var c = (title && title.charAt(0)) || '';
+    var useAn = /^[AEIOU]/.test(c);
+    return 'YOU ARE LIVING IN ' + (useAn ? 'AN\n' : 'A\n');
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function attachResultButtons(container, worldId, copingId, fromShare) {
+    var shareURL =
+      window.location.origin + window.location.pathname + '#world=' + worldId + '&coping=' + copingId;
+    var tw = encodeURIComponent(
+      'My dystopia: ' +
+        SHARE_LABEL[worldId] +
+        ' world, ' +
+        SHARE_LABEL[copingId] +
+        ' resistance. Which are you?'
+    );
+    var urlEnc = encodeURIComponent(shareURL);
+
+    var bCopy = document.createElement('button');
+    bCopy.type = 'button';
+    bCopy.className = 'btn btn-primary';
+    bCopy.textContent = '[ TRANSMIT RESULT ]';
+    bCopy.addEventListener('click', function () {
+      copyToClipboard(shareURL, bCopy);
+    });
+
+    var bTweet = document.createElement('a');
+    bTweet.className = 'btn';
+    bTweet.href = 'https://twitter.com/intent/tweet?text=' + tw + '&url=' + urlEnc;
+    bTweet.target = '_blank';
+    bTweet.rel = 'noopener noreferrer';
+    bTweet.textContent = '[ POST TO THE BIRD SITE ]';
+
+    var bAgain = document.createElement('button');
+    bAgain.type = 'button';
+    bAgain.className = 'btn';
+    bAgain.textContent = '[ RUN AGAIN ]';
+    bAgain.addEventListener('click', function () {
+      history.replaceState(null, '', window.location.pathname);
+      worldScores = emptyScores();
+      copingScores = emptyScores();
+      document.getElementById('progress-dots').classList.add('hidden');
+      showScreen('screen-landing');
+      runLanding();
+    });
+
+    container.appendChild(bCopy);
+    container.appendChild(bTweet);
+    container.appendChild(bAgain);
+
+    if (fromShare) {
+      var bTake = document.createElement('a');
+      bTake.className = 'btn';
+      bTake.href = window.location.pathname || 'index.html';
+      bTake.textContent = '[ TAKE THE QUIZ YOURSELF \u2192 ]';
+      container.appendChild(bTake);
+    }
+  }
+
+  function copyToClipboard(text, btn) {
+    function done() {
+      var t = btn.textContent;
+      btn.textContent = '[ TRANSMITTED. ]';
+      setTimeout(function () { btn.textContent = t; }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        done();
+      } catch (e) {
+        prompt('Copy this URL:', text);
+      }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function tryHash() {
+    var hash = window.location.hash.slice(1);
+    if (!hash) return false;
+    var params = new URLSearchParams(hash);
+    var world = params.get('world');
+    var coping = params.get('coping');
+    if (
+      world &&
+      coping &&
+      VALID_ARCHETYPES.indexOf(world) >= 0 &&
+      VALID_ARCHETYPES.indexOf(coping) >= 0
+    ) {
+      showScreen('screen-result');
+      setActiveFromWorld(world);
+      showResult(world, coping, { fromShare: true });
+      return true;
+    }
+    var legacy = params.get('archetype');
+    if (legacy && VALID_ARCHETYPES.indexOf(legacy) >= 0) {
+      showScreen('screen-result');
+      setActiveFromWorld(legacy);
+      showResult(legacy, legacy, { fromShare: true });
+      return true;
+    }
+    return false;
+  }
+
+  document.getElementById('btn-begin').addEventListener('click', beginQuiz);
+
+  if (!tryHash()) {
+    runLanding();
+  }
+
+  window.addEventListener('hashchange', function () {
+    if (tryHash()) { /* loaded result */ }
+  });
+})();
+  </script>
+</body>
+</html>
