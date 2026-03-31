@@ -11,6 +11,7 @@ Literary personality quiz — single-page app (vanilla HTML/CSS/JS, no build).
 | Deliverable | Notes |
 |-------------|--------|
 | `index.html` | Entire app: questions, dual-dimension scoring (world vs coping), split or unified result layouts, share via URL hash, clipboard + “bird site” intent, `<details>` reference table, accessible “eyebrow” contrast, terminal aesthetic |
+| `dystopia-quiz-handoff.md` | Full product spec (kept in sync with shipped behavior) |
 
 ## Requirements (runtime)
 
