@@ -181,7 +181,7 @@
 
     #progress-dots {
       position: fixed;
-      bottom: 0;
+      bottom: 2.75rem;
       left: 0;
       right: 0;
       text-align: center;
@@ -193,6 +193,36 @@
       pointer-events: none;
     }
     #progress-dots.hidden { display: none; }
+
+    .site-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.45rem 1rem 0.65rem;
+      text-align: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      line-height: 1.35;
+      color: var(--text-dim);
+      z-index: 102;
+      background: linear-gradient(to top, var(--bg) 70%, transparent);
+    }
+    .site-footer a {
+      color: var(--text-mid);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .site-footer a:hover {
+      color: var(--text);
+      border-bottom-color: rgba(232, 228, 217, 0.25);
+    }
+    .site-footer a:focus-visible {
+      outline: 1px solid var(--text-mid);
+      outline-offset: 3px;
+    }
 
     .result-screen {
       background-color: color-mix(in srgb, var(--active) 10%, var(--bg) 90%);
@@ -520,6 +550,14 @@
   </div>
 
   <div id="progress-dots" class="hidden" aria-hidden="true"></div>
+
+  <footer class="site-footer">
+    <a
+      href="https://bananasutra.substack.com/p/which-dystopia-are-you-living-in"
+      target="_blank"
+      rel="noopener noreferrer"
+    >Read the related @bananasutra Substack article</a>
+  </footer>
 
   <script>
 (function () {
